@@ -238,6 +238,22 @@ var graphioGremlin = (function(){
 				
 	}
 
+	function getCookie(cname) {
+		var name = cname + "=";
+		var decodedCookie = decodeURIComponent(document.cookie);
+		var ca = decodedCookie.split(';');
+		for(var i = 0; i <ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0) == ' ') {
+				c = c.substring(1);
+			}
+			if (c.indexOf(name) == 0) {
+				return c.substring(name.length, c.length);
+			}
+		}
+		return "";
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	// AJAX request for the REST API
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,8 +262,12 @@ var graphioGremlin = (function(){
 		$('#messageArea').html('<h3>(loading)</h3>');
 
 		// Get the data from the server
+		let jwt = getCookie("jwt");
 		$.ajax({
 			type: "POST",
+			headers: {
+				"Authorization": "Bearer " + jwt
+			},
 			accept: "application/json",
 			//contentType:"application/json; charset=utf-8",
 			url: server_url,

@@ -54,7 +54,7 @@ app.post('/token/', urlencodedParser, (req, res) => {
     logger("token", idToken);
     let accessToken = req.body.access_token || req.query.access_token;
     logger("accessToken", accessToken)
-    res.cookie("jwt", accessToken, {secure: false, httpOnly: true})
+    res.cookie("jwt", idToken, {secure: false})
     res.json({
         status: "ok",
         token: idToken,
@@ -86,7 +86,17 @@ app.get('/me', jwt({
 
 // Proxy endpoints
 const proxy = httpProxy.createProxyServer();
-app.all('/gremlin', function (req, res) {
+app.all('/gremlin', jwt({
+    secret: jwksRsa.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 2,
+        jwksUri: `https://login.microsoftonline.com/1e60243c-eab7-4f24-aa6f-1834217eabfa/discovery/v2.0/keys`
+    }),
+    audience: audience,
+    issuer: issuer,
+    algorithms: [ 'RS256' ]
+}), (req, res) => {
     proxy.web(req, res, {
         changeOrigin: true,
         target: API_SERVICE_URL,

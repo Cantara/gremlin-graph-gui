@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+<!--        <meta http-equiv="refresh" content="1; url="graphexp.html">-->
+
+        <title>Graph</title>
+    </head>
+    <body>
+    <span id="myId"></span>
+<script>
+    // setCookie("test", "nåå", 20);
+
+document.getElementById('myId').innerHTML=listCookies()
+function listCookies() {
+    var theCookies = document.cookie.split(';');
+    var aString = '';
+    for (var i = 1 ; i <= theCookies.length; i++) {
+        aString += i + ' ' + theCookies[i-1] + "\n";
+    }
+    return aString;
+}
+    function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        var expires = "expires="+d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+    $('#submitButton').on('click',function(){
+        let jwt = getCookie("jwt");
+        $.ajax({
+            url: "me",
+            type: 'GET',
+            contentType: 'application/json',
+            headers: {
+                "Authorization": "Bearer " + jwt
+            },
+            async: false
+        })});
+</script>
+    <input id="tokenField" type="hidden" />
+    <input id="submitButton" type="button" />
+        If you are not redirected automatically, follow this <a href="graphexp.html">link to example</a>.
+    </body>
+</html>
