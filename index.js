@@ -54,12 +54,13 @@ app.post('/token/', urlencodedParser, (req, res) => {
     logger("token", idToken);
     let accessToken = req.body.access_token || req.query.access_token;
     logger("accessToken", accessToken)
-    res.cookie("jwt", idToken, {secure: false})
-    res.json({
-        status: "ok",
-        token: idToken,
-        accessToken
-    });
+    res.cookie("jwt", idToken, {secure: false});
+    res.redirect("/");
+    // res.json({
+    //     status: "ok",
+    //     token: idToken,
+    //     accessToken
+    // });
     // let auth = "Bearer " + req.body.id_token;
     // res.header('Authorization', auth).redirect("/me");
     // res.json({
