@@ -22,3 +22,7 @@ curl -i -X GET \
 ```
 6. Expect Ok
 
+## AzureAd setup
+
+`"oauth2AllowImplicitFlow": true,`
+

@@ -40,10 +40,11 @@ app.get('/info', (req, res, next) => {
 app.use(express.static('public'));
 app.get('/login', (req, res) => {
     res.redirect('https://login.microsoftonline.com/1e60243c-eab7-4f24-aa6f-1834217eabfa/oauth2/v2.0/authorize?' +
-        'client_id=7bb8baf3-39e2-4a21-96cf-863a00af450b&response_type=id_token' +
+        'client_id=7bb8baf3-39e2-4a21-96cf-863a00af450b' +
+        '&response_type=id_token%20token' +
         '&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Ftoken%2F' +
         '&response_mode=form_post' +
-        '&scope=openid' +
+        '&scope=openid+profile+email' +
         '&state=12345' +
         '&nonce=678910')
 });
@@ -51,10 +52,13 @@ app.get('/login', (req, res) => {
 app.post('/token/', urlencodedParser, (req, res) => {
     let idToken = req.body.id_token || req.query.id_token;
     logger("token", idToken);
-    res.cookie("jwt", idToken, {secure: false, httpOnly: true})
+    let accessToken = req.body.access_token || req.query.access_token;
+    logger("accessToken", accessToken)
+    res.cookie("jwt", accessToken, {secure: false, httpOnly: true})
     res.json({
         status: "ok",
-        token: idToken
+        token: idToken,
+        accessToken
     });
     // let auth = "Bearer " + req.body.id_token;
     // res.header('Authorization', auth).redirect("/me");
@@ -75,7 +79,9 @@ app.get('/me', jwt({
     algorithms: [ 'RS256' ]
 }), (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    res.sendStatus(200);
+    res.json({
+        user: req.user
+    });
 });
 
 // Proxy endpoints
