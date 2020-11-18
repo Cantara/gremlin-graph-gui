@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require("morgan");
 var httpProxy = require('http-proxy');
@@ -8,17 +9,19 @@ const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const logger = require('debug')('express');
 
-const jwksHost = process.env.JWKS_HOST;
-const audience = process.env.AUDIENCE || '7bb8baf3-39e2-4a21-96cf-863a00af450b';
-const issuer = process.env.ISSUER || 'https://login.microsoftonline.com/1e60243c-eab7-4f24-aa6f-1834217eabfa/v2.0' ;
+const audience = process.env.JWT_AUDIENCE;
+const issuer = process.env.JWT_ISSUER;
+const jwksUri = process.env.OPENID_JWKS_URI;
+const clientId = process.env.OPENID_CLIENT_ID;
+const authorizeUri = process.env.OPENID_AUTHORIZE_URI;
 
 // Create Express Server
 const app = express();
 
 // Configuration
-const PORT = 3000;
-const HOST = "localhost";
-const API_SERVICE_URL = "https://localhost:8182/";
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.DNS_HOSTNAME || "localhost";
+const API_SERVICE_URL = process.env.GREMLIN_URI;
 
 // Logging
 app.use(morgan('dev'));
@@ -39,10 +42,18 @@ app.get('/info', (req, res, next) => {
 
 app.use(express.static('public'));
 app.get('/login', (req, res) => {
-    res.redirect('https://login.microsoftonline.com/1e60243c-eab7-4f24-aa6f-1834217eabfa/oauth2/v2.0/authorize?' +
-        'client_id=7bb8baf3-39e2-4a21-96cf-863a00af450b' +
+    function buildRedirectUri() {
+        if (HOST == "localhost") {
+            return encodeURI("http://localhost:" + PORT + "/token/");
+        } else {
+            return encodeURI("https://" + HOST + ":" + PORT + "/token");
+        }
+    }
+
+    res.redirect(authorizeUri +'?' +
+        'client_id='+ clientId +
         '&response_type=id_token%20token' +
-        '&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Ftoken%2F' +
+        '&redirect_uri=' + buildRedirectUri() +
         '&response_mode=form_post' +
         '&scope=openid+profile+email' +
         '&state=12345' +
@@ -73,7 +84,7 @@ app.get('/me', jwt({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 2,
-        jwksUri: `https://login.microsoftonline.com/1e60243c-eab7-4f24-aa6f-1834217eabfa/discovery/v2.0/keys`
+        jwksUri: jwksUri
     }),
     audience: audience,
     issuer: issuer,
@@ -92,7 +103,7 @@ app.all('/gremlin', jwt({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 2,
-        jwksUri: `https://login.microsoftonline.com/1e60243c-eab7-4f24-aa6f-1834217eabfa/discovery/v2.0/keys`
+        jwksUri: jwksUri
     }),
     audience: audience,
     issuer: issuer,
