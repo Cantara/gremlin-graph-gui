@@ -1,10 +1,9 @@
-require('dotenv').config();
 // configuration for the graph database access
 
 // if host is set, will override default localhost server option
 //const host = "some_gremlin_server"
-const host = process.env.DNS_HOSTNAME || "localhost";
-const PORT = process.env.PORT || 3003;
+const host = "localhost";
+const port = 3003;
 
 // For implementations like Neptune where only single commands are allowed per request
 // set to true
