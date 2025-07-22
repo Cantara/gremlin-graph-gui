@@ -16,7 +16,7 @@
     "http-proxy-middleware": "^1.0.6",
     "jwks-rsa": "^1.12.3",
     "logger": "^0.0.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.1"
   },
   "scripts": {
     "start": "node index.js",
